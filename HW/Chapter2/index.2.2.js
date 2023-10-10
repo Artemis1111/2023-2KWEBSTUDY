@@ -1,3 +1,5 @@
+process.chdir(__dirname);
+
 const fs = require('fs');
 const util = require('util');
 const path = require('path');
@@ -8,20 +10,20 @@ const stat = util.promisify(fs.stat);
 const extname = util.promisify(path.extname);
 const join = util.promisify(path.join);
 
-const filename = 'HW/Chapter2/test';
+const filename = './test';
 
 const directoryJSSearch = async filename => {
   try {
     await readdir(filename, function(err, fileList) {
-      for(i=0; i < fileList.length; i++){
-        stat(fileList[i], (err, stats) =>{
-          if (stats.isDirectory()){
-            console.log("a");
-          }
-          
-        });
-        
-      }
+      fileList.forEach(async file => {
+        const ansPath = path.join(filename, file);
+        const Stat = await stat(ansPath);
+        if (Stat.isDirectory()) {
+          await directoryJSSearch(ansPath);
+        } else if (path.extname(ansPath) === '.js') {
+          console.log(ansPath);
+        }
+      });
     });
   } catch (err) {
     console.error(err);
